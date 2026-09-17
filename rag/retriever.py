@@ -7,6 +7,7 @@ def retrieve(query: str):
         if not os.path.exists(VECTORSTORE_DIR):
             return []
 
+        # Lazy import to prevent loading heavy models at startup
         from langchain_community.vectorstores import Chroma
         from langchain_huggingface import HuggingFaceEmbeddings
 

@@ -1,14 +1,27 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from reasoning.conversation import ConversationManager
 from reasoning.recommender import generate_recommendations
-# from rag.retriever import retrieve  # We'll import this lazily inside the endpoint
+import os
 
-# Global flag to enable/disable RAG on the live server
-ENABLE_RAG = False  # Set to True only if you upgrade your Render plan
+# --- Configuration ---
+# Set this to True only if you upgrade your Render plan to a higher memory tier
+ENABLE_RAG = False 
 
 app = FastAPI(title="Darukaa Earth AI")
+
+# --- CORS Middleware ---
+# This is crucial for allowing your Streamlit frontend to call this API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins for this demo; restrict in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 conversations: Dict[str, ConversationManager] = {}
 
 class QueryRequest(BaseModel):
@@ -35,11 +48,11 @@ async def chat(request: QueryRequest):
     
     recs = generate_recommendations(cm.slots)
     
-    # Only use RAG if enabled and avoid a heavy import at startup
+    # --- Lazy RAG Retrieval ---
     docs = []
     if ENABLE_RAG:
         try:
-            from rag.retriever import retrieve
+            from rag.retriever import retrieve  # Lazy import to save memory
             rec_names = " ".join([r['recommendation'] for r in recs]) if recs else ""
             search_query = f"{request.message} {rec_names}".strip()
             docs = retrieve(search_query)
