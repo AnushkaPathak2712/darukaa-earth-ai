@@ -1,8 +1,7 @@
 import os
+import json
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings 
-from langchain_community.vectorstores import Chroma
 
 DOCS_DIR = "data/documents"
 VECTORSTORE_DIR = "data/vectorstore"
@@ -30,16 +29,16 @@ def ingest():
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks = text_splitter.split_documents(documents)
     
-    print(f"Created {len(chunks)} chunks. Generating embeddings...")
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    # Extract just the text content from the chunks
+    chunk_texts = [chunk.page_content for chunk in chunks]
     
-    vectordb = Chroma.from_documents(
-        documents=chunks,
-        embedding=embeddings,
-        persist_directory=VECTORSTORE_DIR
-    )
-    vectordb.persist()
-    print(f"Successfully ingested {len(chunks)} chunks into the vector database.")
+    os.makedirs(VECTORSTORE_DIR, exist_ok=True)
+    output_file = os.path.join(VECTORSTORE_DIR, "chunks.json")
+    
+    with open(output_file, 'w') as f:
+        json.dump(chunk_texts, f)
+    
+    print(f"Successfully ingested {len(chunk_texts)} chunks into {output_file}.")
 
 if __name__ == "__main__":
     ingest()

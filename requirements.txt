@@ -11,3 +11,5 @@ pypdf
 sqlalchemy
 pydantic
 requests
+scikit-learn
+numpy
