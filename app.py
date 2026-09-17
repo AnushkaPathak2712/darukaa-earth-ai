@@ -4,6 +4,9 @@ import requests
 st.set_page_config(page_title="Darukaa Earth AI", layout="wide")
 st.title("🌍 Darukaa.Earth AI Biodiversity Intelligence")
 
+
+BACKEND_URL = "https://darukaa-earth-ai-ms98.onrender.com" 
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "user_id" not in st.session_state:
@@ -35,12 +38,16 @@ with st.sidebar:
             "moisture": moisture,
             "habitat_diversity": habitat
         }
-        response = requests.post("http://localhost:8000/chat", json={
-            "user_id": st.session_state.user_id,
-            "message": "Here is my structured environmental data.",
-            "structured_data": structured
-        })
-        st.session_state.messages.append({"role": "assistant", "content": response.json()["response"]})
+        try:
+            response = requests.post(f"{BACKEND_URL}/chat", json={
+                "user_id": st.session_state.user_id,
+                "message": "Here is my structured environmental data.",
+                "structured_data": structured
+            })
+            response.raise_for_status()
+            st.session_state.messages.append({"role": "assistant", "content": response.json()["response"]})
+        except Exception as e:
+            st.error(f"Error connecting to backend: {e}")
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
@@ -51,11 +58,15 @@ if prompt := st.chat_input("Describe your land or ask a question..."):
     with st.chat_message("user"):
         st.write(prompt)
     
-    response = requests.post("http://localhost:8000/chat", json={
-        "user_id": st.session_state.user_id,
-        "message": prompt
-    })
-    answer = response.json()["response"]
-    st.session_state.messages.append({"role": "assistant", "content": answer})
-    with st.chat_message("assistant"):
-        st.write(answer)
+    try:
+        response = requests.post(f"{BACKEND_URL}/chat", json={
+            "user_id": st.session_state.user_id,
+            "message": prompt
+        })
+        response.raise_for_status()
+        answer = response.json()["response"]
+        st.session_state.messages.append({"role": "assistant", "content": answer})
+        with st.chat_message("assistant"):
+            st.write(answer)
+    except Exception as e:
+        st.error(f"Error connecting to backend: {e}")
