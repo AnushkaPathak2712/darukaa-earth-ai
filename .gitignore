@@ -1,0 +1,18 @@
+# Virtual Environment
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated Vector Database
+data/vectorstore/
+
+# Local SQLite Database
+data/structured/sites.db
+
+# OS specific
+.DS_Store
+Thumbs.db
