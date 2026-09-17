@@ -9,7 +9,7 @@ You can try the live application here:
 
 ## 📸 Demo Screenshot
 ![Darukaa AI Demo](demo.png)
-*(The screenshot above shows the system generating multi-metric recommendations with evidence from FAO, IPCC, and IPBES, alongside the retrieved RAG knowledge chunks.)*
+
 
 ## ✨ Key Features
 - **Hybrid Knowledge Retrieval:** Combines document retrieval (RAG) with a structured SQLite database.
